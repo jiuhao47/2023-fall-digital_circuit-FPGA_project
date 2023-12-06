@@ -1,0 +1,7 @@
+//FPGA上的BRAM https://zhuanlan.zhihu.com/p/649757917
+//ARTIX-7 FPGA开发平台用户手册 AX7035 https://www.alinx.com/public/upload/file/AX7035_UG.pdf
+//FPGA入门开发部分流程（Vivado2020+Verilog） https://blog.csdn.net/qq_37832932/article/details/109275131
+//ARTIX-7 XC7A35T实验项目之流水灯 https://blog.csdn.net/weixin_51028584/article/details/127231495
+//【数字IC/FPGA】FPGA的约束文件https://zhuanlan.zhihu.com/p/552751188
+//Xilinx FPGA I/O电平标准简介(LVCMOS33) https://blog.csdn.net/hxt691083776/article/details/116228424
+//DDR3内存详解，存储器结构+时序+初始化过程 https://blog.csdn.net/a_chinese_man/article/details/73381338
