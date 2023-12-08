@@ -89,7 +89,7 @@ set_property -dict { PACKAGE_PIN AA6    IOSTANDARD LVCMOS33 } [get_ports { DDR3_
 set_property -dict { PACKAGE_PIN T6    IOSTANDARD LVCMOS33 } [get_ports { DDR3_A[11] }];
 set_property -dict { PACKAGE_PIN Y6    IOSTANDARD LVCMOS33 } [get_ports { DDR3_A[12] }];
 set_property -dict { PACKAGE_PIN R6    IOSTANDARD LVCMOS33 } [get_ports { DDR3_A[13] }];
-# A0~A14为15根地址线，根据MT41K256M16的框图可以知道，有15根行地址线A0~A14和10根列地址线A0~A9
+# A0~A13为15根地址线，有1根行地址线A0~A14和10根列地址线A0~A9
 # 行地址线和列地址线进行复用
 
 set_property -dict { PACKAGE_PIN AB8    IOSTANDARD LVCMOS33 } [get_ports { DDR3_BA[0] }];
