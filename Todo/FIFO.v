@@ -8,7 +8,7 @@ module FIFO #(parameter dw=8, L=7)
   output ack_in,
   output [dw-1:0] d_out, 
   output req_out, 
-  input ack_out
+  input ack_out 
 );
 
   reg [dw-1:0] data [L-1:0]; // 创建一个存储数据的寄存器数组
