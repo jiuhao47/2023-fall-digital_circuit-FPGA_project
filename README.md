@@ -51,6 +51,9 @@ Verilog files for group sharing.
        endgenerate
        ```
 
-    3. 
+  - 关于组员：
+
+    1. `FIFO.v`已完成
+    2. `LED_display.v`已完成
 
   
