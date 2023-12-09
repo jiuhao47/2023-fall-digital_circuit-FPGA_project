@@ -34,3 +34,4 @@ module FIFO #(parameter dw=8, L=7)
       end
     end
 endmodule
+
