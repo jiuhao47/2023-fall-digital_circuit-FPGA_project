@@ -31,7 +31,10 @@ Verilog files for group sharing.
 
   - 关于`AX7035`开发板，找到了一份完备的教程。
 
-  - 关于`DDR3`：建立了`ddr3`的功能及驱动模块
+  - 关于`DDR3`：
+
+    1. 建立了`ddr3`的功能及驱动模块。
+    2. 建立了`mem_burst.v`的读写模块，但是还未来得及分析。
 
   - 关于`.xdc`文件
 
@@ -41,7 +44,7 @@ Verilog files for group sharing.
 
     1. 仿照样例撰写了`led7seg_decode.v`，本质为`0-9`二进制数到8端数码管数据译码器。
 
-    2. 写了一些注释：其中下面一段代码存疑
+    2. 写了一些注释：其中下面一段代码存疑。
 
        ```verilog
        genvar i;

@@ -19,3 +19,7 @@
   > 
 
   ![7SegmentLED](E:\VSCODE\UCAS-Digitial_Circuits-Finalwork\pic\7SegmentLED.png)
+
+- `DDR3`使用，说明文档[12.DDR3读写测试与仿真实验.pdf](file:///C:/Users/20149/AppData/Local/Temp/Rar$DIa20852.24898/12.DDR3读写测试与仿真实验.pdf)
+
+  > 明天再说（2023.12.9）
