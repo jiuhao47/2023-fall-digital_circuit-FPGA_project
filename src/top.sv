@@ -7,34 +7,34 @@ module top(
     output [7:0] seg_dig
 );
 
-    reg [3:0] led;
+    reg [3:0] led;//4-LED 端口
 
     always @(posedge clk or negedge rstn)
     if(!rstn)
-        led <= 0;
+        led <= 0;//复位
     else
-        led <= led ^ (~key);
+        led <= led ^ (~key);//led与key按键对应，key低有效
 
-    reg [23:0] cnt;
-    wire [6*8-1:0] seg;
+    reg [23:0] cnt;//24宽通道，计数
+    wire [6*8-1:0] seg;//48k宽信号
 
     always @(posedge clk or negedge rstn)
     if(!rstn)
-        cnt <= 0;
+        cnt <= 0;//计数复位
     else begin
         if(~key[0]) cnt = cnt + 1;
         if(~key[1]) cnt = cnt + 2;
         if(~key[2]) cnt = cnt + 4;
-        if(~key[3]) cnt = cnt + 8;
+        if(~key[3]) cnt = cnt + 8;//按键功能
     end
 
     genvar i;
     generate for(i=0; i<6; i=i+1) begin
-            led7seg_decode d(cnt[i*4 +: 4], 1'b1, seg[i*8 +: 8]);
+            led7seg_decode d(cnt[i*4 +: 4], 1'b1, seg[i*8 +: 8]);//+是做什么的？
         end
     endgenerate
     
-    seg_driver #(6) driver(clk, rstn, 6'b111111, seg, seg_sel, seg_dig);
+    seg_driver #(6) driver(clk, rstn, 6'b111111, seg, seg_sel, seg_dig);//数码管驱动
 
 endmodule
 
@@ -70,28 +70,24 @@ module seg_driver #(parameter NPorts=8) (
 endmodule
 
 module led7seg_decode(input [3:0] digit, input valid, output reg [7:0] seg);
-
+    //译码器 d to seg
+    //digit数据
+    //valid使能端
+    //seg 输出端
     always @(digit)
     if(valid)
         case(digit)
-            0: seg = 8'b00111111;
-            1: seg = 8'b00000110;
-            2: seg = 8'b01011011;
-            3: seg = 8'b01001111;
-            4: seg = 8'b01100110;
-            5: seg = 8'b01101101;
-            6: seg = 8'b01111101;
-            7: seg = 8'b00000111;
-            8: seg = 8'b01111111;
-            9: seg = 8'b01101111;
-            10: seg = 8'b01110111;
-            11: seg = 8'b01111100;
-            12: seg = 8'b00111001;
-            13: seg = 8'b01011110;
-            14: seg = 8'b01111011;
-            15: seg = 8'b01110001;
+            0: seg = 8'b00111111;//0
+            1: seg = 8'b00000110;//1
+            2: seg = 8'b01011011;//2
+            3: seg = 8'b01001111;//3
+            4: seg = 8'b01100110;//4
+            5: seg = 8'b01101101;//5
+            6: seg = 8'b01111101;//6
+            7: seg = 8'b00000111;//7
+            8: seg = 8'b01111111;//8
+            9: seg = 8'b01101111;//9
             default: seg = 0;
         endcase
     else seg = 8'd0;
-
 endmodule

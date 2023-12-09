@@ -13,4 +13,4 @@ module ram #(parameter DW=8, AW=10) (
     end
 endmodule
 
-//这里是对BRAM的操作，而我们使用的是DRAM（大概 2023.12.6）
+//这里是对BRAM的操作，而我们使用的是SRAM（大概 2023.12.6）
