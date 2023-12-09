@@ -1,3 +1,6 @@
+//封装成黑盒
+//理解其使用方式及时序情况by 姜俊彦
+
 module mem_burst
 #(
 parameter                                 MEM_DATA_BITS     =   64,
