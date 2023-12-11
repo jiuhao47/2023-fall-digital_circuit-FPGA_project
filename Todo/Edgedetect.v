@@ -1,5 +1,31 @@
-//è¾¹æ²¿æ£€æµ‹-åˆ˜é•‡è±ª
-//æ—¶åºé€»è¾‘è®¾è®¡B-å®éªŒ.pdf P11
-//input key,clk
-//output pulse
-//è®°å¾—å†™æ³¨é‡Š
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+module Edgedetect(
+    input key,      // °´Å¥ÊäÈë
+    input clk,      // Ê±ÖÓĞÅºÅ
+    output pulse // Âö³åÊä³ö
+);
+
+reg key_prev; // ´æ´¢Ç°Ò»¸ö°´¼ü×´Ì¬
+reg pulse_reg; // always¿éÖĞ´¢´æ×´Ì¬
+
+// ÔÚÃ¿¸öÊ±ÖÓÉÏÉıÑØ¸üĞÂ°´¼ü×´Ì¬
+always @(posedge clk) begin
+    key_prev <= key;
+    // µ±¼ì²âµ½°´¼üµÄ¸ºÑØÊ±£¬Éú³ÉÂö³å
+    if (key_prev & ~key) 
+        pulse_reg <= 1;
+    else 
+        pulse_reg <= 0;
+end
+
+assign pulse = pulse_reg;
+
+endmodule
+//////////////////////////////////////////////////////////////////////////////////
+
+
+module Edgedetect(
+
+    );
+endmodule

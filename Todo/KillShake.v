@@ -1,5 +1,38 @@
-//æŒ‰é”®é™¤æŠ–-åˆ˜é•‡è±ª
-//æ—¶åºé€»è¾‘è®¾è®¡B-å®éªŒ.pdf P10
-//input key,clk
-//output signal
-//è®°å¾—å†™æ³¨é‡Š
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+module Killshake(
+    input clk,        // Ê±ÖÓĞÅºÅ
+    input key,  // º¬ÔëÉùµÄ°´¼üÊäÈë
+    output signal  // Çå½àµÄ°´¼üÊä³ö
+);
+
+parameter DEBOUNCE_TIME = 1000000; // È¥¶¶Ê±¼äãĞÖµ£¬¸ù¾İÊ±ÖÓÆµÂÊµ÷Õû
+reg [19:0] count;       // ¼ÆÊıÆ÷£¬Î»¿íÈ¡¾öÓÚDEBOUNCE_TIME
+reg key_state;          // ´æ´¢ÎÈ¶¨ºóµÄ°´¼ü×´Ì¬
+reg signal_reg;         // always¿éÖĞ´¢´æ×´Ì¬
+
+always @(posedge clk) begin
+    if (key == key_state) begin
+        // Èç¹ûµ±Ç°ÊäÈë×´Ì¬ÓëÈ¥¶¶ºóµÄ×´Ì¬ÏàÍ¬£¬ÔòÔö¼Ó¼ÆÊıÆ÷
+        if (count < DEBOUNCE_TIME) 
+            count <= count + 1;
+        else
+            signal_reg <= key_state; // ¸üĞÂÊä³ö×´Ì¬
+    end else begin
+        // Èç¹ûÊäÈë×´Ì¬¸Ä±ä£¬ÖØÖÃ¼ÆÊıÆ÷²¢¸üĞÂÈ¥¶¶ºóµÄ×´Ì¬
+        count <= 0;
+        key_state <= key;
+    end
+end
+
+assign signal = signal_reg;
+
+endmodule
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+module Killshake(
+
+    );
+endmodule
