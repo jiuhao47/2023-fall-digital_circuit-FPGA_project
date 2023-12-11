@@ -6,7 +6,7 @@ module Killshake(
     output signal  // 清洁的按键输出
 );
 
-parameter DEBOUNCE_TIME = 1000000; // 去抖时间阈值，根据时钟频率调整
+parameter DEBOUNCE_TIME = 1000000; // 去抖时间阈值，根据时钟频率调整,1/50s
 reg [19:0] count;       // 计数器，位宽取决于DEBOUNCE_TIME
 reg key_state;          // 存储稳定后的按键状态
 reg signal_reg;         // always块中储存状态

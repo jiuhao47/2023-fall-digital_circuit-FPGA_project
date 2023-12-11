@@ -58,5 +58,7 @@ Verilog files for group sharing.
 
     1. `FIFO.v`已完成
     2. `LED_display.v`已完成
-
+  3. `Edgedetect.v`已完成
+    4. `KillShake.v`已完成
+  
   
