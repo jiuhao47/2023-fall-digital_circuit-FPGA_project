@@ -22,7 +22,7 @@ module seg_driver #(parameter NPorts=8) (
     if(~rstn)
         sel <= 0;
     else if(cnt == 0)
-      sel <= (sel == NPorts - 1) ? 0 : sel + 1; // 若条件(sel == NPorts - 1)为真，将sel赋值为0，否则sel+1
+      sel <= (sel == NPorts - 1) ? 0 : sel + 1; // 若条件(sel == NPorts - 1)为真，将sel赋值为0，否则sel+1，循环刷新
 
   always @(sel, valid_i) begin // 使用 sel 和 valid_i 作为敏感信号的 always 块
     valid_o = {NPorts{1'b1}}; // 初始化 valid_o 为全 1 的向量，表示所有输出端口有效
