@@ -1,18 +1,17 @@
-`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 module Edgedetect(
-    input key,      // °´Å¥ÊäÈë
-    input clk,      // Ê±ÖÓĞÅºÅ
-    output pulse // Âö³åÊä³ö
+    input key,      // æŒ‰é’®è¾“å…¥
+    input clk,      // æ—¶é’Ÿä¿¡å·
+    output pulse // è„‰å†²è¾“å‡º
 );
 
-reg key_prev; // ´æ´¢Ç°Ò»¸ö°´¼ü×´Ì¬
-reg pulse_reg; // always¿éÖĞ´¢´æ×´Ì¬
+reg key_prev; // å­˜å‚¨å‰ä¸€ä¸ªæŒ‰é”®çŠ¶æ€
+reg pulse_reg; // alwayså—ä¸­å‚¨å­˜çŠ¶æ€
 
-// ÔÚÃ¿¸öÊ±ÖÓÉÏÉıÑØ¸üĞÂ°´¼ü×´Ì¬
+// åœ¨æ¯ä¸ªæ—¶é’Ÿä¸Šå‡æ²¿æ›´æ–°æŒ‰é”®çŠ¶æ€
 always @(posedge clk) begin
     key_prev <= key;
-    // µ±¼ì²âµ½°´¼üµÄ¸ºÑØÊ±£¬Éú³ÉÂö³å
+    // å½“æ£€æµ‹åˆ°æŒ‰é”®çš„è´Ÿæ²¿æ—¶ï¼Œç”Ÿæˆè„‰å†²
     if (key_prev & ~key) 
         pulse_reg <= 1;
     else 
@@ -23,9 +22,3 @@ assign pulse = pulse_reg;
 
 endmodule
 //////////////////////////////////////////////////////////////////////////////////
-
-
-module Edgedetect(
-
-    );
-endmodule

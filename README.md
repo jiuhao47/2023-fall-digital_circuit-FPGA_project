@@ -61,4 +61,8 @@ Verilog files for group sharing.
   3. `Edgedetect.v`已完成
     4. `KillShake.v`已完成
   
-  
+- 2023.12.17
+
+  - 关于`top.sv`
+    1. 实现了防抖电路和脉冲输出的测试
+    2. 撰写了指示灯显示与状态切换代码（目前还有问题，待测试）

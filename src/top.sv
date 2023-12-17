@@ -11,32 +11,121 @@ module top(
 
     always @(posedge clk or negedge rstn)
     if(!rstn)
-        led <= 0;//复位
-    else
-        led <= led ^ (~key);//led与key按键对应，key低有效
+        led <= 4'b1111;//复位(全灭)
+    else begin
+        led[0] <= led[0] ^ (~state[0]);//led与key按键对应，key低有效
+        led[1] <= led[1] ^ (~state[1]);
+        led[2] <= led[2] ^ (~state[2]);
+        led[3] <= led[3] ^ (~state[3]);
+    end
+    wire key_signal [3:0];
+    wire key_pulse [3:0];
+    reg  state[3:0];
+    genvar j;
+    generate for (j = 0;j<4;j=j+1 ) begin
+        Killshake Killshake (clk,key[j],key_signal[j]);
+        Edgedetect Edgedetect (key_signal[j],clk,key_pulse[j]);
+        always @(key_pulse[j]) begin
+            //多驱问题导致独热编码难写?
+            if(~key_pulse[j]) begin
+                state[j]=1;    
+            end
+            if((~(key_pulse[0]&key_pulse[1]&key_pulse[2]&key_pulse[3]))&(key_pulse[j]))begin
+                state[j]=0;
+            end
+        end
+    end
+    endgenerate
+
+    
+    
 
     reg [23:0] cnt;//24宽通道，计数
     wire [6*8-1:0] seg;//48k宽信号
-
-    always @(posedge clk or negedge rstn)
+    reg key_pulse_reg [3:0];
+    always @(posedge clk or negedge rstn) begin
     if(!rstn)
         cnt <= 0;//计数复位
     else begin
-        if(~key[0]) cnt = cnt + 1;
-        if(~key[1]) cnt = cnt + 2;
-        if(~key[2]) cnt = cnt + 4;
-        if(~key[3]) cnt = cnt + 8;//按键功能
+        key_pulse_reg[0]<=key_pulse[0];
+        key_pulse_reg[1]<=key_pulse[1];
+        key_pulse_reg[2]<=key_pulse[2];
+        key_pulse_reg[3]<=key_pulse[3];
+        if(~key_pulse_reg[0]) cnt = cnt + 1;
+        if(~key_pulse_reg[1]) cnt = cnt + 2;
+        if(~key_pulse_reg[2]) cnt = cnt + 4;
+        if(~key_pulse_reg[3]) cnt = cnt + 8;//按键功能
     end
-
+    end
     genvar i;
     generate for(i=0; i<6; i=i+1) begin
             led7seg_decode d(cnt[i*4 +: 4], 1'b1, seg[i*8 +: 8]);//+是做什么的？
         end
     endgenerate
     
+
+
     seg_driver #(6) driver(clk, rstn, 6'b111111, seg, seg_sel, seg_dig);//数码管驱动
 
 endmodule
+
+
+//////////////////////////////////////////////////////////////////////////////////
+module Edgedetect(
+    input key,      // 按钮输入
+    input clk,      // 时钟信号
+    output pulse // 脉冲输出
+);
+
+reg key_prev; // 存储前一个按键状态
+reg pulse_reg; // always块中储存状态
+
+// 在每个时钟上升沿更新按键状态
+always @(posedge clk) begin
+    key_prev <= key;
+    // 当检测到按键的负沿时，生成脉冲
+    if (key_prev & ~key) 
+        pulse_reg <= 0;
+    else 
+        pulse_reg <= 1;
+end
+
+assign pulse = pulse_reg;
+
+endmodule
+//////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////
+module Killshake(
+    input clk,        // 时钟信号
+    input key,  // 含噪声的按键输入
+    output signal  // 清洁的按键输出
+);
+
+parameter DEBOUNCE_TIME = 1000000; // 去抖时间阈值，根据时钟频率调整,1/50s
+reg [19:0] count;       // 计数器，位宽取决于DEBOUNCE_TIME
+reg key_state;          // 存储稳定后的按键状态
+reg signal_reg;         // always块中储存状态
+
+always @(posedge clk) begin
+    if (key == key_state) begin
+        // 如果当前输入状态与去抖后的状态相同，则增加计数器
+        if (count < DEBOUNCE_TIME) 
+            count <= count + 1;
+        else
+            signal_reg <= key_state; // 更新输出状态
+    end else begin
+        // 如果输入状态改变，重置计数器并更新去抖后的状态
+        count <= 0;
+        key_state <= key;
+    end
+end
+
+assign signal = signal_reg;
+
+endmodule
+
+//////////////////////////////////////////////////////////////////////////////////
 
 
 //数码管驱动
@@ -89,6 +178,12 @@ module led7seg_decode(input [3:0] digit, input valid, output reg [7:0] seg);
             7: seg = 8'b00000111;//7
             8: seg = 8'b01111111;//8
             9: seg = 8'b01101111;//9
+            10: seg = 8'b01110111;
+            11: seg = 8'b01111100;
+            12: seg = 8'b00111001;
+            13: seg = 8'b01011110;
+            14: seg = 8'b01111011;
+            15: seg = 8'b01110001;
             default: seg = 0;
         endcase
     else seg = 8'd0;
