@@ -6,34 +6,38 @@ module top(
     output [5:0] seg_sel,
     output [7:0] seg_dig
 );
+    initial begin
+        led = 4'b1111;
+    end
 
     reg [3:0] led_r;//4-LED 端口
 
-    always @(posedge clk or negedge rstn)
-    if(!rstn)
-        led_r <= 4'b1111;//复位(全灭)
-    else begin
-        led_r[0] <= (led_r[0] & (~state[0])) | turn_off[0];//led与key按键对应，key低有效
-        led_r[1] <= (led_r[1] & (~state[1])) | turn_off[1];
-        led_r[2] <= (led_r[2] & (~state[2])) | turn_off[2];
-        led_r[3] <= (led_r[3] & (~state[3])) | turn_off[3];
+    always @(posedge clk) begin
+        if(~rstn) begin
+            led_r <= 4'b1111;//复位(全灭)
+        end
+        else begin
+            led_r[0] <= led_r[0] ^ (~state[0]);//led与key按键对应，key低有效
+            led_r[1] <= led_r[1] ^ (~state[1]);
+            led_r[2] <= led_r[2] ^ (~state[2]);
+            led_r[3] <= led_r[3] ^ (~state[3]);
+        end
     end
-    wire key_signal [3:0];
-    wire key_pulse [3:0];
-    reg  state[3:0];
-    reg turn_off[3:0];
+    wire key_signal[3:0];
+    wire key_pulse[3:0];
+    reg state[3:0];
     genvar j;
     generate for(j = 0; j < 4; j = j + 1) begin
         Killshake Killshake (clk,key[j],key_signal[j]);
         Edgedetect Edgedetect (key_signal[j],clk,key_pulse[j]);
-        always @(negedge key_pulse[j]) begin
+        /*always @(negedge key_pulse[j]) begin
             //多驱问题导致独热编码难写?
             if(!key_pulse[j]) begin
                 state[j] = 1;    
             end
-            /*if((~(key_pulse[0] & key_pulse[1] & key_pulse[2] & key_pulse[3])) & key_pulse[j])begin
+            if((~(key_pulse[0] & key_pulse[1] & key_pulse[2] & key_pulse[3])) & key_pulse[j])begin
                 state[j]=0;
-            end*/
+            end
             else begin
                 state[j] = 0;
             end
@@ -46,10 +50,20 @@ module top(
             if(state[j]) begin
                 turn_off[j] = 0;
             end
-        end
-        
+        end*/
     end
     endgenerate
+
+    always @(posedge clk) begin
+        if(~key_pulse[0])
+            led_r = 4'b0111;
+        else if(~key_pulse[1])
+            led_r = 4'b1011;
+        else if(~key_pulse[2])
+            led_r = 4'b1101;
+        else if(~key_pulse[3])
+            led_r = 4'b1110;
+    end
 
     assign led = led_r;
 
