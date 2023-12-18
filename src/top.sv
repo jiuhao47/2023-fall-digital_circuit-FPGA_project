@@ -6,9 +6,6 @@ module top(
     output [5:0] seg_sel,
     output [7:0] seg_dig
 );
-    initial begin
-        led = 4'b1111;
-    end
 
     reg [3:0] led_r;//4-LED 端口
 
