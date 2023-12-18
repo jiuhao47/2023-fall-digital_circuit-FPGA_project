@@ -13,14 +13,15 @@ module top(
     if(!rstn)
         led_r <= 4'b1111;//复位(全灭)
     else begin
-        led_r[0] <= led_r[0] & (~state[0]);//led与key按键对应，key低有效
-        led_r[1] <= led_r[1] & (~state[1]);
-        led_r[2] <= led_r[2] & (~state[2]);
-        led_r[3] <= led_r[3] & (~state[3]);
+        led_r[0] <= (led_r[0] & (~state[0])) | turn_off[0];//led与key按键对应，key低有效
+        led_r[1] <= (led_r[1] & (~state[1])) | turn_off[1];
+        led_r[2] <= (led_r[2] & (~state[2])) | turn_off[2];
+        led_r[3] <= (led_r[3] & (~state[3])) | turn_off[3];
     end
     wire key_signal [3:0];
     wire key_pulse [3:0];
     reg  state[3:0];
+    reg turn_off[3:0];
     genvar j;
     generate for(j = 0; j < 4; j = j + 1) begin
         Killshake Killshake (clk,key[j],key_signal[j]);
@@ -37,6 +38,16 @@ module top(
                 state[j] = 0;
             end
         end
+        always @(posedge state[j] or negedge state[j]) begin
+            if(!state[j]) begin
+                turn_off[j] = 1;
+            end
+
+            if(state[j]) begin
+                turn_off[j] = 0;
+            end
+        end
+        
     end
     endgenerate
 
