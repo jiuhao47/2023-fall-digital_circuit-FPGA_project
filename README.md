@@ -75,3 +75,5 @@ Verilog files for group sharing.
   - 总体任务分发
     1. `20bTo6dDecoder.v`-吴尚哲
     2. `1second.v`-刘镇豪
+  - 关于组员完成情况
+    1. `1second.v`已完成，未测试
