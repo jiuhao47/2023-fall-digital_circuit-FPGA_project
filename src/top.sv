@@ -6,10 +6,6 @@ module top(
     output [5:0] seg_sel,
     output [7:0] seg_dig
 );
-    initial begin
-        led = 4'b1111;
-    end
-
     reg [3:0] led_r;//4-LED 端口
 
     always @(posedge clk) begin
@@ -17,10 +13,14 @@ module top(
             led_r <= 4'b1111;//复位(全灭)
         end
         else begin
-            led_r[0] <= led_r[0] ^ (~state[0]);//led与key按键对应，key低有效
-            led_r[1] <= led_r[1] ^ (~state[1]);
-            led_r[2] <= led_r[2] ^ (~state[2]);
-            led_r[3] <= led_r[3] ^ (~state[3]);
+            if(~key_pulse[0])
+                led_r = 4'b1110;
+            else if(~key_pulse[1])
+                led_r = 4'b1101;
+            else if(~key_pulse[2])
+                led_r = 4'b1011;
+            else if(~key_pulse[3])
+                led_r = 4'b0111;
         end
     end
     wire key_signal[3:0];
@@ -30,46 +30,12 @@ module top(
     generate for(j = 0; j < 4; j = j + 1) begin
         Killshake Killshake (clk,key[j],key_signal[j]);
         Edgedetect Edgedetect (key_signal[j],clk,key_pulse[j]);
-        /*always @(negedge key_pulse[j]) begin
-            //多驱问题导致独热编码难写?
-            if(!key_pulse[j]) begin
-                state[j] = 1;    
-            end
-            if((~(key_pulse[0] & key_pulse[1] & key_pulse[2] & key_pulse[3])) & key_pulse[j])begin
-                state[j]=0;
-            end
-            else begin
-                state[j] = 0;
-            end
-        end
-        always @(posedge state[j] or negedge state[j]) begin
-            if(!state[j]) begin
-                turn_off[j] = 1;
-            end
-
-            if(state[j]) begin
-                turn_off[j] = 0;
-            end
-        end*/
     end
     endgenerate
-
-    always @(posedge clk) begin
-        if(~key_pulse[0])
-            led_r = 4'b0111;
-        else if(~key_pulse[1])
-            led_r = 4'b1011;
-        else if(~key_pulse[2])
-            led_r = 4'b1101;
-        else if(~key_pulse[3])
-            led_r = 4'b1110;
-    end
 
     assign led = led_r;
 
 
-    
-    
 
     reg [23:0] cnt;//24宽通道，计数
     wire [6*8-1:0] seg;//48k宽信号
@@ -88,12 +54,13 @@ module top(
         if(~key_pulse_reg[3]) cnt = cnt + 8;//按键功能
     end
     end
+    /*
     genvar i;
     generate for(i=0; i<6; i=i+1) begin
             led7seg_decode d(cnt[i*4 +: 4], 1'b1, seg[i*8 +: 8]);//+是做什么的？
         end
     endgenerate
-    
+    */
 
 
     seg_driver #(6) driver(clk, rstn, 6'b111111, seg, seg_sel, seg_dig);//数码管驱动
@@ -221,17 +188,65 @@ module led7seg_decode(input [3:0] digit, input valid, output reg [7:0] seg);
 endmodule
 
 
-module ram #(parameter DW=8, AW=10) (
-    input clk, we,//时钟输入与
-    input [DW-1:0] din,//数据输入
-    input [AW-1:0] addr,//地址
-    output [DW-1:0] dout //数据输出
+module isprime #(parameter N=1000000)(
+    input clk,rstn,
+    output over
 );
-    reg [AW-1:0] read_addr;//读入地址
-    reg [DW-1:0] mem [2**AW - 1:0];//单个单元8位宽，长1024的数组
-    assign dout = mem[read_addr]; //数据输出为读取地址
-    always @(posedge clk) begin
-        if(we) mem[addr] <= din; //we为真，则将输入数值写入addr地址处的内存
-        read_addr <= addr;
+    reg[19:0]       w_addr;	        //写入的数据的地址
+    reg             w_data;	        //写入的数据
+    reg             wea;	        //使能端
+    reg[19:0]       r_addr;         //读取的数据的地址
+    wire            r_data;	        //读取的数据
+
+    reg [19:0]      i;              //外层循环变量
+    reg [19:0]      j;              //内层循环变量
+    reg             en;
+    reg             done;
+    always @(posedge clk or negedge rstn) begin
+        if(!rstn) begin
+            flag<=0;
+            wea<=0;
+            i<=2;
+            j<=0;
+            en<=0;
+            done<=0;
+        end
+        else if (i*i<=N&&(en==0)) begin 
+            r_addr<=i;
+            if (r_data==1) begin
+                en<=1;
+            end
+            i<=i+1;
+        end
+        else if(en==1) begin
+            j<=i+i;
+            if(j<N)begin
+                wea<=1;
+                w_addr<=j;
+                w_data<=0;
+                j<=j+i;
+            end
+            else begin
+                wea<=0;
+                en<=0;
+            end
+        end
+        else begin
+            done<=1;
+        end
     end
-endmodule
+    assign over=done;
+ram_ip ram_ip_inst 
+(
+    .clka      (clk          ),     // input clka
+    .wea       (wea          ),     // input [0 : 0] wea
+    .addra     (w_addr       ),     // input [19 : 0] addra
+    .dina      (w_data       ),     // input [0 : 0] dina
+    .clkb      (clk          ),     // input clkb
+    .addrb     (r_addr       ),     // input [19 : 0] addrb
+    .doutb     (r_data       )      // output [0 : 0] doutb
+);
+endmodule //isprime
+
+
+
