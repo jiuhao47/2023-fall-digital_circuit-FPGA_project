@@ -7,35 +7,41 @@ module top(
     output [7:0] seg_dig
 );
 
-    reg [3:0] led;//4-LED 端口
+    reg [3:0] led_r;//4-LED 端口
 
     always @(posedge clk or negedge rstn)
     if(!rstn)
-        led <= 4'b1111;//复位(全灭)
+        led_r <= 4'b1111;//复位(全灭)
     else begin
-        led[0] <= led[0] ^ (~state[0]);//led与key按键对应，key低有效
-        led[1] <= led[1] ^ (~state[1]);
-        led[2] <= led[2] ^ (~state[2]);
-        led[3] <= led[3] ^ (~state[3]);
+        led_r[0] <= led_r[0] & (~state[0]);//led与key按键对应，key低有效
+        led_r[1] <= led_r[1] & (~state[1]);
+        led_r[2] <= led_r[2] & (~state[2]);
+        led_r[3] <= led_r[3] & (~state[3]);
     end
     wire key_signal [3:0];
     wire key_pulse [3:0];
     reg  state[3:0];
     genvar j;
-    generate for (j = 0;j<4;j=j+1 ) begin
+    generate for(j = 0; j < 4; j = j + 1) begin
         Killshake Killshake (clk,key[j],key_signal[j]);
         Edgedetect Edgedetect (key_signal[j],clk,key_pulse[j]);
-        always @(key_pulse[j]) begin
+        always @(negedge key_pulse[j]) begin
             //多驱问题导致独热编码难写?
-            if(~key_pulse[j]) begin
-                state[j]=1;    
+            if(!key_pulse[j]) begin
+                state[j] = 1;    
             end
-            if((~(key_pulse[0]&key_pulse[1]&key_pulse[2]&key_pulse[3]))&(key_pulse[j]))begin
+            /*if((~(key_pulse[0] & key_pulse[1] & key_pulse[2] & key_pulse[3])) & key_pulse[j])begin
                 state[j]=0;
+            end*/
+            else begin
+                state[j] = 0;
             end
         end
     end
     endgenerate
+
+    assign led = led_r;
+
 
     
     
