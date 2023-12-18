@@ -1,5 +1,5 @@
 module ram #(parameter DW=8, AW=10) (
-    input clk, we,//时钟输入与
+    input clk, we,//时钟输入与使能端
     input [DW-1:0] din,//数据输入
     input [AW-1:0] addr,//地址
     output [DW-1:0] dout //数据输出
@@ -13,4 +13,5 @@ module ram #(parameter DW=8, AW=10) (
     end
 endmodule
 
-//这里是对BRAM的操作，而我们使用的是SRAM（大概 2023.12.6）
+//这里是对BRAM的操作
+//如果使用位图数据结构，BRAM看起来也足够使用
