@@ -10,13 +10,10 @@ module binary_20b_to_bcd_6d #(parameter N = 20,parameter M = 24)
   input	[N-1:0]	input_20b,     
   output [M-1:0]	output_6d      
 ); 
-	
-  
-  
-	reg [3:0] digits [0:M-1];    
+  reg [3:0] digits [0:M-1];      
 
-integer i; 
-   initial begin  
+integer i;  
+   initial begin   
      for (i = 0; i < M; i = i+1) begin
        digits[i] = 4'd0;
      end
