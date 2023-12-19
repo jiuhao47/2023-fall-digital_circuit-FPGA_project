@@ -33,7 +33,7 @@ integer i;
 		   digits[0][3:0] = {digits[0][2:0], input_20b[i]};   
 	end  
 end	    
-	assign output_6d = digits;   
+	assign output_6d ={digits[5],digits[4],digits[3],digits[2],digits[1],digits[0]};   
 endmodule 
   
 
