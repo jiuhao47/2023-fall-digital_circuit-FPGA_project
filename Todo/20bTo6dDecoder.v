@@ -35,4 +35,45 @@ integer i;
 end	    
 	assign output_6d = digits;   
 endmodule 
+  
 
+//二进制转十进制，取反转回二进制
+module binary_20b_to_bcd_6d(
+	input [19:0] input_20b,
+	output [23:0] output_6d
+);
+   reg [3:0] remainder;  
+	reg [5:0] medium_6;
+	reg [23:0] decoder_6d;
+   reg [5:0] reverse;
+
+   initial begin
+      medium_6 = 6'b0; 
+      decoder_6d = 24'b0;        
+
+      genvar i，p;      // 从二进制转换到到十进制
+      p = 1;
+      generate for (i = 0; i < 20; i = i + 1) begin  
+            remainder = input_20b[i]; 
+            medium_6 = medium_6 + remainder * p;
+            p = p * 2;
+         end
+      endgenerate
+     
+      genvar j;    // 反转medium_6                      
+      generate for (j = 0; j < 6; j = j + 1) begin       
+            reverse = reverse << 1;  
+	      reverse[0] = medium_6[j];  
+         end
+      endgenerate     
+
+      genvar k;  //十进制再转到二进制                 
+      generate 
+         for (k = 0; k < 6; k = k + 1) begin     
+		 decoder_6d = (decoder_6d << 4) + reverse[k]; 
+         end
+      endgenerate 
+
+      assign output_6d = decoder_6d;
+   end
+endmodule
