@@ -21,12 +21,12 @@ integer i;
        digits[i] = 4'd0;
      end
      for(i = N-1; i >= 0; i = i-1) begin  //加3移位法
-       if (digits[0] >= 4'b0101) 		 digits[0] = digits[0] + 4'b0011; 
-       if (digits[1] >= 4'b0101) 		 digits[1] = digits[1] + 4'b0011; 
-       if (digits[2] >= 4'b0101)		 digits[2] = digits[2] + 4'b0011; 
-       if (digits[3] >= 4'b0101)		 digits[3] = digits[3] + 4'b0011;   
-       if (digits[4] >= 4'b0101)		 digits[4] = digits[4] + 4'b0011;  
-       if (digits[5] >= 4'b0101)     digits[5] = digits[5] + 4'b0011; 
+	     if (digits[0] >= 4'b0101) digits[0] = digits[0] + 4'b0011;  
+	     if (digits[1] >= 4'b0101) digits[1] = digits[1] + 4'b0011;  
+	     if (digits[2] >= 4'b0101) digits[2] = digits[2] + 4'b0011;  
+	     if (digits[3] >= 4'b0101) digits[3] = digits[3] + 4'b0011;    
+	     if (digits[4] >= 4'b0101) digits[4] = digits[4] + 4'b0011;   
+	     if (digits[5] >= 4'b0101) digits[5] = digits[5] + 4'b0011;   
 
        digits[5][3:0] = {digits[5][2:0], digits[4][3]}; 
        digits[4][3:0] = {digits[4][2:0], digits[3][3]}; 
