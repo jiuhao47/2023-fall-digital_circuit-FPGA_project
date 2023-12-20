@@ -10,7 +10,7 @@ module binary_20b_to_bcd_6d #(parameter N = 20,parameter M = 24)
 	input [N-1:0] input_20b,       
 	output [M-1:0] output_6d       
 );  
-	reg [3:0] digits [0:M-1];       
+	reg [3:0] digits [M-1:0];       
 
 integer i;    
    initial begin     
@@ -35,8 +35,10 @@ integer i;
 end	    
 	assign output_6d ={digits[5],digits[4],digits[3],digits[2],digits[1],digits[0]};   
 endmodule 
-  
 
+//电路目前有问题，不工作 
+
+/*
 //二进制转十进制，取反转回二进制
 module binary_20b_to_bcd_6d(
 	input [19:0] input_20b,
@@ -51,7 +53,8 @@ module binary_20b_to_bcd_6d(
       medium_6 = 6'b0; 
       decoder_6d = 24'b0;        
 
-      genvar i，p;      // 从二进制转换到到十进制
+      genvar i;
+      genvar p;      // 从二进制转换到到十进制
       p = 1;
       generate for (i = 0; i < 20; i = i + 1) begin  
             remainder = input_20b[i]; 
@@ -77,3 +80,4 @@ module binary_20b_to_bcd_6d(
       assign output_6d = decoder_6d;
    end
 endmodule
+*/
