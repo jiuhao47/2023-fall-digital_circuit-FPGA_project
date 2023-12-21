@@ -10,10 +10,10 @@ module binary_20b_to_bcd_6d #(parameter N = 20,parameter M = 24)
 	input [N-1:0] input_20b,       
 	output [M-1:0] output_6d       
 );  
-	reg [3:0] digits [M-1:0];       
+	reg [3:0] digits [5:0];       
 
 integer i;    
-   initial begin     
+	always @(input_20b) begin     
 	   for (i = 0; i < 6; i = i+1) begin
 		   digits[i] = 4'd0;  
      end 
@@ -40,44 +40,42 @@ endmodule
 
 /*
 //二进制转十进制，取反转回二进制
-module binary_20b_to_bcd_6d(
-	input [19:0] input_20b,
-	output [23:0] output_6d
-);
-   reg [3:0] remainder;  
-	reg [5:0] medium_6;
-	reg [23:0] decoder_6d;
-   reg [5:0] reverse;
+module binary_20b_to_bcd_6d (    
+	input [19:0] input_20b,       
+	output [23:0] output_6d       
+);  
+	reg [3:0] ones;       
+	reg [3:0] twos;
+	reg [3:0] threes;
+	reg [3:0] fours;
+	reg [3:0] fives;
+	reg [3:0] sixs;
 
-   initial begin
-      medium_6 = 6'b0; 
-      decoder_6d = 24'b0;        
+integer i;    
+   always @(input_20b) begin     
+	 
+        ones 	= 4'b0000;
+	twos 	= 4'b0000;
+	threes 	= 4'b0000;
+        fours 	= 4'b0000;
+        fives 	= 4'b0000;
+        sixs 	= 4'b0000;
+	   for(i = 19; i >= 0; i = i-1) begin  //加3移位法 
+		   if (ones >= 4'b0101) ones = ones + 4'b0011;   
+		   if (twos >= 4'b0101) twos = twos + 4'b0011;   
+		   if (threes >= 4'b0101) threes = threes + 4'b0011;   
+		   if (fours  >= 4'b0101) fours  = fours  + 4'b0011;     
+		   if (fives >= 4'b0101) fives = fives + 4'b0011;    
+		   if (sixs >= 4'b0101) sixs = sixs + 4'b0011;    
 
-      genvar i;
-      genvar p;      // 从二进制转换到到十进制
-      p = 1;
-      generate for (i = 0; i < 20; i = i + 1) begin  
-            remainder = input_20b[i]; 
-            medium_6 = medium_6 + remainder * p;
-            p = p * 2;
-         end
-      endgenerate
-     
-      genvar j;    // 反转medium_6                      
-      generate for (j = 0; j < 6; j = j + 1) begin       
-            reverse = reverse << 1;  
-	      reverse[0] = medium_6[j];  
-         end
-      endgenerate     
-
-      genvar k;  //十进制再转到二进制                 
-      generate 
-         for (k = 0; k < 6; k = k + 1) begin     
-		 decoder_6d = (decoder_6d << 4) + reverse[k]; 
-         end
-      endgenerate 
-
-      assign output_6d = decoder_6d;
-   end
-endmodule
+		   sixs = {sixs[2:0], fives[3]};  
+		   fives = {fives[2:0], fours[3]};  
+		   fours = {fours[2:0],  threes[3]};    
+		   threes = {threes[2:0], twos [3]};  
+		   twos  = {twos [2:0],  ones[3]};   
+		   ones = { ones[2:0], input_20b[i]};   
+	end  
+end	    
+	assign output_6d ={sixs,fives,fours,threes,twos, ones};   
+endmodule 
 */
