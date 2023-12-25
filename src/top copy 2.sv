@@ -11,12 +11,10 @@ module top
     reg  [3:0]          led_r;
     wire [3:0]          key_signal;
     wire [3:0]          key_pulse;
-    wire                rstn_signal;
-    wire                rstn_pulse;
-    wire [3:0]          state;
+    reg  [3:0]          state;
 
-    always @(posedge clk or negedge rstn_pulse) begin
-        if(~rstn_pulse) begin
+    always @(posedge clk) begin
+        if(~rstn) begin
             led_r <= 4'b1111;
         end
         else begin
@@ -38,11 +36,7 @@ module top
     end
     endgenerate
 
-        Killshake Killshake(clk,rstn,rstn_signal);
-        Edgedetect Edgedetect(rstn_signal,rstn_pulse);
-
     assign led = led_r;
-    assign state=led_r;
 
     wire                tick;
     Count_to_one_second timer(clk,tick);//1秒计时器
@@ -53,7 +47,7 @@ module top
     wire [23:0]         cnt_24d;
     reg  [3:0]          key_pulse_reg;
 
-    isprime solver(clk,rstn,tick,state,cnt_20b);
+    isprime solver(clk,rstn,tick,cnt_20b);
 
     always @(posedge clk or negedge rstn) begin
     if(!rstn)
@@ -236,7 +230,6 @@ endmodule
 module isprime #(parameter N=999999)
 (
     input clk,rstn,tick,
-    input [3:0] state,
     output [19:0] cnt_20b
 );
     reg [19:0]      w_addr;	        //写入的数据的地址
@@ -258,13 +251,6 @@ module isprime #(parameter N=999999)
     reg             hold;
     reg [2:0]       timer_out;
     reg             hold_out;
-    
-    reg keychange;
-
-    always @(state) begin
-        keychange=
-    end
-
 
     always @(posedge clk or negedge rstn) begin
         if(!rstn) begin
