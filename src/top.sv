@@ -15,8 +15,8 @@ module top
     wire                rstn_pulse;
     wire [3:0]          state;
 
-    always @(posedge clk or negedge rstn_pulse) begin
-        if(~rstn_pulse) begin
+    always @(posedge clk or negedge rstn_signal) begin
+        if(~rstn_signal) begin
             led_r <= 4'b1111;
         end
         else begin
@@ -53,10 +53,10 @@ module top
     wire [23:0]         cnt_24d;
     reg  [3:0]          key_pulse_reg;
 
-    isprime solver(clk,rstn,tick,state,cnt_20b);
+    isprime solver(clk,rstn_signal,tick,state,cnt_20b);
 
-    always @(posedge clk or negedge rstn) begin
-    if(!rstn)
+    always @(posedge clk or negedge rstn_signal) begin
+    if(!rstn_signal)
         ;
     else begin
         key_pulse_reg[0]<=key_pulse[0];
@@ -112,7 +112,7 @@ module top
         end
     endgenerate
 
-    seg_driver #(6) driver(clk, rstn, 6'b111111, seg, seg_sel, seg_dig);//数码管驱动，48宽（6*8）数据显示
+    seg_driver #(6) driver(clk, rstn_signal, 6'b111111, seg, seg_sel, seg_dig);//数码管驱动，48宽（6*8）数据显示
 
 endmodule
 
@@ -259,12 +259,16 @@ module isprime #(parameter N=999999)
     reg [2:0]       timer_out;
     reg             hold_out;
     
+    wire tick_temp;
+    Count_to_one_second time_temp(clk,tick_temp);
+    
+    /*
     reg keychange;
 
     always @(state) begin
         keychange=
     end
-
+    */
 
     always @(posedge clk or negedge rstn) begin
         if(!rstn) begin
@@ -277,8 +281,6 @@ module isprime #(parameter N=999999)
             done<=0;
             timer<=0;
             hold<=1;
-            timer_out<=0;
-            hold_out<=1;
         end
         else if (i*i<=N) begin 
             if(en==0)begin
@@ -323,29 +325,46 @@ module isprime #(parameter N=999999)
                 if(done) begin
                     if (cnt_temp_reg<N) begin
                         r_addr<=cnt_temp_reg;
-                        
-                        if(timer>2)begin
-                            timer<=0;
-                            hold=0;
+                        if(hold) begin
+                            if(timer>2)begin
+                                timer<=0;
+                                hold<=0;
+                            end
+                            else begin
+                                timer<=timer+1;
+                                //hold<=1;
+                            end
                         end
                         else begin
-                            timer<=timer+1;
-                            hold=1;
-                        end
+                            if ((~r_data)&tick_temp) begin
+                                cnt_20b_reg<=cnt_temp_reg;
+                                cnt_temp_reg<=cnt_temp_reg+1;
+                                hold<=1;
+                            end
+                            else if ((r_data)) begin
+                                cnt_temp_reg<=cnt_temp_reg+1;
+                                hold<=1;
+                            end
+                            else if((~r_data)&(~tick_temp)) begin
+                                cnt_temp_reg<=cnt_temp_reg;
+                            end
                         
-                    if(!hold) begin
+                    
+
                     /*    
-                    if ((~r_data)&tick) begin
+                    if ((~r_data)&tick_temp) begin
                         cnt_20b_reg<=cnt_temp_reg;
                         cnt_temp_reg<=cnt_temp_reg+1;
                     end
                     else if ((r_data)) begin
                         cnt_temp_reg<=cnt_temp_reg+1;
                     end
-                    else if((~r_data)&(~tick)) begin
+                    else if((~r_data)&(~tick_temp)) begin
                         cnt_temp_reg<=cnt_temp_reg;
                     end
+                    //让他多等一会
                     */
+                    /*
                     if ((~r_data)) begin
                         cnt_20b_reg<=cnt_temp_reg;
                         cnt_temp_reg<=cnt_temp_reg+1;
@@ -353,6 +372,7 @@ module isprime #(parameter N=999999)
                     else if ((r_data)) begin
                         cnt_temp_reg<=cnt_temp_reg+1;
                     end
+                    */
                     end
                 end
             end
