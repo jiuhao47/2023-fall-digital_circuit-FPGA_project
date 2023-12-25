@@ -14,22 +14,8 @@ module top
     wire                rstn_signal;
     wire                rstn_pulse;
     wire [3:0]          state;
-
-    always @(posedge clk or negedge rstn_signal) begin
-        if(~rstn_signal) begin
-            led_r <= 4'b1111;
-        end
-        else begin
-            if(~key_pulse[0])
-                led_r = 4'b1110;
-            else if(~key_pulse[1])
-                led_r = 4'b1101;
-            else if(~key_pulse[2])
-                led_r = 4'b1011;
-            else if(~key_pulse[3])
-                led_r = 4'b0111;
-        end
-    end
+    wire                initial_state;
+    reg                 initial_state_r;
 
     genvar j;
     generate for(j = 0; j < 4; j = j + 1) begin
@@ -38,72 +24,95 @@ module top
     end
     endgenerate
 
-        Killshake Killshake(clk,rstn,rstn_signal);
-        Edgedetect Edgedetect(rstn_signal,rstn_pulse);
+    Killshake Killshake(clk,rstn,rstn_signal);
+    Edgedetect Edgedetect(rstn_signal,rstn_pulse);
+
+
+
+    always @(posedge clk or negedge rstn_signal) begin
+        if(~rstn_signal) begin
+            led_r <= 4'b1111;
+            initial_state_r = 1;
+        end
+        else begin
+            if(~key_pulse[0]) begin
+                led_r = 4'b1110;
+                initial_state_r = 0;
+            end
+            else if(~key_pulse[1]) begin
+                led_r = 4'b1101;
+                initial_state_r = 0;
+            end
+            else if(~key_pulse[2]) begin
+                led_r = 4'b1011;
+                initial_state_r = 0;
+            end
+            else if(~key_pulse[3]) begin
+                led_r = 4'b0111;
+                initial_state_r = 0;
+            end
+        end
+    end
 
     assign led = led_r;
-    assign state=led_r;
+    assign state = led_r;
+    assign initial_state = initial_state_r;
+
 
     wire                tick;
-    Count_to_one_second timer(clk,tick);//1秒计时器
+    wire                one_second;
+    reg                 tick_r;
 
+    Count_to_one_second timer(clk,one_second);//1秒计时器
+    assign tick = tick_r;
+
+
+
+    wire                select;
+    reg                 select_reg;
+    wire                reset;
+
+    always @(posedge clk or negedge rstn_signal) begin
+    if(!rstn_signal) begin
+        tick_r<=0;
+    end
+    /*
+    else if(initial_state) begin
+        
+    end
+    */
+    else if(rstn_signal & ~initial_state & (~state[0])) begin
+        tick_r <= one_second;
+        select_reg<=1;
+
+    end
+    else if(rstn_signal & ~initial_state & (~state[1])) begin
+        tick_r <= one_second;
+        select_reg<=0;
+
+    end
+    else if(rstn_signal & ~initial_state & (~state[2])) begin
+        tick_r <= 1;
+        select_reg<=1;
+
+    end
+    else if(rstn_signal & ~initial_state & (~state[3])) begin
+        tick_r <= 1;
+        select_reg<=0;
+ 
+    end
+    end
+    assign select=select_reg;
+    assign reset=(&key_pulse)&rstn_signal;
 
     wire [47:0]         seg;
     wire [19:0]         cnt_20b;
     wire [23:0]         cnt_24d;
-    reg  [3:0]          key_pulse_reg;
+    
 
-    isprime solver(clk,rstn_signal,tick,state,cnt_20b);
+    isprime solver(clk,reset,tick,select,cnt_20b);
 
-    always @(posedge clk or negedge rstn_signal) begin
-    if(!rstn_signal)
-        ;
-    else begin
-        key_pulse_reg[0]<=key_pulse[0];
-        key_pulse_reg[1]<=key_pulse[1];
-        key_pulse_reg[2]<=key_pulse[2];
-        key_pulse_reg[3]<=key_pulse[3];
-        /*
-            if(tick) begin
-                cnt_24d<=cnt_24d+1;
-                wea<=1;
-                r_addr<=cnt;
-                if(r_data==1) begin
-                    
-                end
-            end
-            else begin
-                wea<=0;
-            end
-        */    
-    end
-    end
-    /*
-    reg [23:0] cnt;//24宽通道，计数
-    wire [6*8-1:0] seg;//48k宽信号
-    
-    always @(posedge clk or negedge rstn) begin
-    if(!rstn)
-        cnt <= 0;//计数复位
-    else begin
-        key_pulse_reg[0]<=key_pulse[0];
-        key_pulse_reg[1]<=key_pulse[1];
-        key_pulse_reg[2]<=key_pulse[2];
-        key_pulse_reg[3]<=key_pulse[3];
-        if(~key_pulse_reg[0]) cnt = cnt + 1;
-        if(~key_pulse_reg[1]) cnt = cnt + 2;
-        if(~key_pulse_reg[2]) cnt = cnt + 4;
-        if(~key_pulse_reg[3]) cnt = cnt + 8;//按键功能
-    end
-    end
-    
-    genvar i;
-    generate for(i=0; i<6; i=i+1) begin
-            led7seg_decode d(cnt[i*4 +: 4], 1'b1, seg[i*8 +: 8]);//+是做什么的？
-        end
-    endgenerate
-    */
-    
+
     binary_20b_to_bcd_6d transformer(cnt_20b,cnt_24d);
 
     genvar i;
@@ -171,8 +180,6 @@ module Killshake
 
 endmodule
 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 //数码管驱动
 module seg_driver #(parameter NPorts=8)
@@ -236,7 +243,7 @@ endmodule
 module isprime #(parameter N=999999)
 (
     input clk,rstn,tick,
-    input [3:0] state,
+    input select,
     output [19:0] cnt_20b
 );
     reg [19:0]      w_addr;	        //写入的数据的地址
@@ -256,129 +263,89 @@ module isprime #(parameter N=999999)
 
     reg [2:0]       timer;
     reg             hold;
-    reg [2:0]       timer_out;
-    reg             hold_out;
-    
-    wire tick_temp;
-    Count_to_one_second time_temp(clk,tick_temp);
-    
-    /*
-    reg keychange;
 
-    always @(state) begin
-        keychange=
+
+always @(posedge clk or negedge rstn) begin
+    if(!rstn) begin
+        cnt_temp_reg<=(select)?2:N;
+        cnt_20b_reg<=(select)?2:N;
+        wea<=0;
+        i<=2;
+        j<=0;
+        en<=0;
+        done<=0;
+        timer<=0;
+        hold<=1;
     end
-    */
-
-    always @(posedge clk or negedge rstn) begin
-        if(!rstn) begin
-            cnt_20b_reg<=2;
-            cnt_temp_reg<=2;
-            wea<=0;
-            i<=2;
-            j<=0;
-            en<=0;
-            done<=0;
-            timer<=0;
-            hold<=1;
-        end
-        else if (i*i<=N) begin 
-            if(en==0)begin
-                r_addr<=i;
-                if(timer>2)begin
-                    timer<=0;
-                    hold=0;
-                end
-                else begin
-                    timer<=timer+1;
-                    hold=1;
-                end
-                if(!hold) begin
-                if (r_data==0) begin
-                    en<=1;
-                    j<=i+i;
-                end
-                else begin
-                    i<=i+1;
-                end
-                end
-                //i<=i+1;???
+    else if (i*i<=N) begin
+        //cnt_temp_reg<=(select)?2:N; 
+        if(en==0)begin
+            r_addr<=i;
+            if(timer>2)begin
+                timer<=0;
+                hold<=0;
             end
-            else if(en==1) begin
-                //j<=i+i;
-                if(j<N)begin
-                    wea<=1;
-                    w_addr<=j;
-                    w_data<=1;
-                    j<=j+i;
+            else begin
+                timer<=timer+1;
+                hold<=1;
+            end
+            if(!hold) begin
+            if (r_data==0) begin
+                en<=1;
+                j<=i+i;
+            end
+            else begin
+                i<=i+1;
+            end
+            end
+        end
+        else if(en==1) begin
+            if(j<N)begin
+                wea<=1;
+                w_addr<=j;
+                w_data<=1;
+                j<=j+i;
+            end
+            else begin
+                wea<=0;
+                en<=0;
+                i<=i+1;
+            end
+        end 
+    end
+    else begin
+        done<=1;
+        if(done) begin
+            if (((cnt_temp_reg<N)&(select))|((cnt_temp_reg>=2)&(~select))) begin
+                r_addr<=cnt_temp_reg;
+                if(hold) begin
+                    if(timer>2)begin
+                        timer<=0;
+                        hold<=0;
+                    end
+                    else begin
+                        timer<=timer+1;
+                    end
                 end
                 else begin
-                    wea<=0;
-                    en<=0;
-                    i<=i+1;
-                end
-            end 
-        end
-        else begin
-                //wea<=1;
-                done<=1;
-                if(done) begin
-                    if (cnt_temp_reg<N) begin
-                        r_addr<=cnt_temp_reg;
-                        if(hold) begin
-                            if(timer>2)begin
-                                timer<=0;
-                                hold<=0;
-                            end
-                            else begin
-                                timer<=timer+1;
-                                //hold<=1;
-                            end
-                        end
-                        else begin
-                            if ((~r_data)&tick_temp) begin
-                                cnt_20b_reg<=cnt_temp_reg;
-                                cnt_temp_reg<=cnt_temp_reg+1;
-                                hold<=1;
-                            end
-                            else if ((r_data)) begin
-                                cnt_temp_reg<=cnt_temp_reg+1;
-                                hold<=1;
-                            end
-                            else if((~r_data)&(~tick_temp)) begin
-                                cnt_temp_reg<=cnt_temp_reg;
-                            end
-                        
-                    
-
-                    /*    
-                    if ((~r_data)&tick_temp) begin
+                    if ((~r_data)&tick) begin
                         cnt_20b_reg<=cnt_temp_reg;
-                        cnt_temp_reg<=cnt_temp_reg+1;
+                        cnt_temp_reg<=(select)?cnt_temp_reg+1:cnt_temp_reg-1;
+                        hold<=1;
                     end
                     else if ((r_data)) begin
-                        cnt_temp_reg<=cnt_temp_reg+1;
+                        cnt_temp_reg<=(select)?cnt_temp_reg+1:cnt_temp_reg-1;
+                        hold<=1;
                     end
-                    else if((~r_data)&(~tick_temp)) begin
+                    else if((~r_data)&(~tick)) begin
                         cnt_temp_reg<=cnt_temp_reg;
                     end
-                    //让他多等一会
-                    */
-                    /*
-                    if ((~r_data)) begin
-                        cnt_20b_reg<=cnt_temp_reg;
-                        cnt_temp_reg<=cnt_temp_reg+1;
-                    end
-                    else if ((r_data)) begin
-                        cnt_temp_reg<=cnt_temp_reg+1;
-                    end
-                    */
-                    end
                 end
             end
         end
     end
-    assign cnt_20b=cnt_20b_reg;
+end
+assign cnt_20b=cnt_20b_reg;
 ram_ip ram_ip_inst_1 
 (
     .clka      (clk          ),     // input clka

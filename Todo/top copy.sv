@@ -16,11 +16,12 @@ module top
     wire                rstn_signal;
     wire                rstn_pulse;
     wire [3:0]          state;
-
+    wire                initial_state;
+    reg                 initial_state_r;
     always @(posedge clk or negedge rstn_signal) begin
         if(~rstn_signal) begin
             led_r <= 4'b1111;
-            initial_steate_r = 1;
+            initial_state_r = 1;
         end
         else begin
             if(~key_pulse[0]) begin
@@ -65,13 +66,12 @@ module top
     wire [47:0]         seg;
     wire [19:0]         cnt_20b;
     wire [23:0]         cnt_24d;
-    reg  [19:0]         cnt_20b_reg;
+    reg  [19:0]         cnt_20b_r;
     reg  [3:0]          key_pulse_reg;
-    wire                initial_state;
-    reg                 initial_state_r;
 
-    assign initial_state_r = initial_state;
-    assign cnt_20b = cnt_20b_reg;
+
+    assign initial_state = initial_state_r;
+    //assign cnt_20b = cnt_20b_r;
 
     //mode_switch top(clk,rstn,state,initial_state,mode);
 
@@ -79,14 +79,14 @@ module top
 
     always @(posedge clk or negedge rstn_signal) begin
     if(!rstn_signal) begin
-        ;
+        tick_r<=0;
     end
 
     else if(initial_state) begin
-        cnt_20b_reg <= 0;
+        //cnt_20b_r <= 0;
     end
 
-    else if(rstn_signal & ~initial_state_r & state[0]) begin
+    else if(rstn_signal & ~initial_state & (~state[0])) begin
         key_pulse_reg[0]<=key_pulse[0];
         key_pulse_reg[1]<=key_pulse[1];
         key_pulse_reg[2]<=key_pulse[2];
@@ -108,11 +108,11 @@ module top
         */    
     end
 
-    else if(rstn_signal & ~initial_state & state[1]) begin
+    else if(rstn_signal & ~initial_state & (~state[1])) begin
         
     end
 
-    else if(rstn_signal & ~initial_state & state[2]) begin
+    else if(rstn_signal & ~initial_state & (~state[2])) begin
         key_pulse_reg[0]<=key_pulse[0];
         key_pulse_reg[1]<=key_pulse[1];
         key_pulse_reg[2]<=key_pulse[2];
@@ -121,7 +121,7 @@ module top
         tick_r = 1;
     end
 
-    else if(rstn_signal & ~initial_state & state[3]) begin
+    else if(rstn_signal & ~initial_state & (~state[3])) begin
         
     end
     end
@@ -306,9 +306,6 @@ module isprime #(parameter N=999999)
     reg [2:0]       timer_out;
     reg             hold_out;
     
-    wire tick_temp;
-    Count_to_one_second time_temp(clk,tick_temp);
-    
     /*
     reg keychange;
 
@@ -383,7 +380,7 @@ module isprime #(parameter N=999999)
                             end
                         end
                         else begin
-                            if ((~r_data)&tick_temp) begin
+                            if ((~r_data)&tick) begin
                                 cnt_20b_reg<=cnt_temp_reg;
                                 cnt_temp_reg<=cnt_temp_reg+1;
                                 hold<=1;
@@ -392,7 +389,7 @@ module isprime #(parameter N=999999)
                                 cnt_temp_reg<=cnt_temp_reg+1;
                                 hold<=1;
                             end
-                            else if((~r_data)&(~tick_temp)) begin
+                            else if((~r_data)&(~tick)) begin
                                 cnt_temp_reg<=cnt_temp_reg;
                             end
                         
