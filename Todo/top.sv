@@ -9,13 +9,25 @@ module top
 );
 
     reg  [3:0]          led_r;
+    reg                 tick_r;
+    reg                 initial_state_r;
+    reg                 select_reg;
+    
     wire [3:0]          key_signal;
     wire [3:0]          key_pulse;
     wire                rstn_signal;
     wire                rstn_pulse;
     wire [3:0]          state;
     wire                initial_state;
-    reg                 initial_state_r;
+    wire                tick;
+    wire                one_second;
+    wire                select;
+    wire                reset;
+    wire [47:0]         seg;
+    wire [19:0]         cnt_20b;
+    wire [23:0]         cnt_24d;
+
+    Count_to_one_second timer(clk,one_second);//1秒计时器
 
     genvar j;
     generate for(j = 0; j < 4; j = j + 1) begin
@@ -27,51 +39,66 @@ module top
     Killshake Killshake(clk,rstn,rstn_signal);
     Edgedetect Edgedetect(rstn_signal,rstn_pulse);
 
-
-
     always @(posedge clk or negedge rstn_signal) begin
         if(~rstn_signal) begin
             led_r <= 4'b1111;
             initial_state_r = 1;
+            tick_r<=0;
         end
-        else begin
-            if(~key_pulse[0]) begin
-                led_r = 4'b1110;
-                initial_state_r = 0;
-            end
-            else if(~key_pulse[1]) begin
-                led_r = 4'b1101;
-                initial_state_r = 0;
-            end
-            else if(~key_pulse[2]) begin
-                led_r = 4'b1011;
-                initial_state_r = 0;
-            end
-            else if(~key_pulse[3]) begin
-                led_r = 4'b0111;
-                initial_state_r = 0;
-            end
+        else if(~key_pulse[0]) begin
+            led_r = 4'b1110;
+            initial_state_r = 0;
+        end
+        else if(~key_pulse[1]) begin
+            led_r = 4'b1101;
+            initial_state_r = 0;
+        end
+        else if(~key_pulse[2]) begin
+            led_r = 4'b1011;
+            initial_state_r = 0;
+        end
+        else if(~key_pulse[3]) begin
+            led_r = 4'b0111;
+            initial_state_r = 0;
+        end
+        else if(rstn_signal & ~initial_state & (~state[0])) begin
+            tick_r <= one_second;
+            select_reg<=1;
+        end
+        else if(rstn_signal & ~initial_state & (~state[1])) begin
+            tick_r <= one_second;
+            select_reg<=0;
+        end
+        else if(rstn_signal & ~initial_state & (~state[2])) begin
+            tick_r <= 1;
+            select_reg<=1;
+        end
+        else if(rstn_signal & ~initial_state & (~state[3])) begin
+            tick_r <= 1;
+            select_reg<=0;
         end
     end
 
     assign led = led_r;
     assign state = led_r;
     assign initial_state = initial_state_r;
+    assign tick = tick_r;
+    assign select=select_reg;
+    assign reset=(&key_pulse)&rstn_signal;
 
-
+/*
     wire                tick;
     wire                one_second;
     reg                 tick_r;
-
-    Count_to_one_second timer(clk,one_second);//1秒计时器
-    assign tick = tick_r;
-
-
-
+*/
+    
+/*
     wire                select;
     reg                 select_reg;
     wire                reset;
+*/
 
+/*
     always @(posedge clk or negedge rstn_signal) begin
     if(!rstn_signal) begin
         tick_r<=0;
@@ -98,16 +125,9 @@ module top
  
     end
     end
-    assign select=select_reg;
-    assign reset=(&key_pulse)&rstn_signal;
-
-    wire [47:0]         seg;
-    wire [19:0]         cnt_20b;
-    wire [23:0]         cnt_24d;
+*/
     
-
     isprime solver(clk,reset,tick,select,cnt_20b);
-
 
     binary_20b_to_bcd_6d transformer(cnt_20b,cnt_24d);
 
