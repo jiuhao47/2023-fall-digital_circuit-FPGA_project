@@ -75,6 +75,7 @@ module top
             tick_r<=0;
         end
     end
+    
     always @(posedge clk) begin
         reset_r<={reset_r[0],(&key_pulse)&rstn_signal};
     end
