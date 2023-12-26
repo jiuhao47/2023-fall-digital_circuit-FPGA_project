@@ -32,7 +32,7 @@ module top
 
     //Led控制及模式选择
     ledcontrol ledcontrol(clk,rstn_signal,key_pulse,led);
-    modecontrol modecontrol(clk,led,key_pulse,rstn_signal,one_second,reset,select,tick);
+    modecontrol modecontrol(clk,rstn_signal,one_second,led,key_pulse,reset,select,tick);
 
     //埃氏筛法
     isprime solver(clk,reset,tick,select,cnt_20b);
@@ -119,6 +119,7 @@ module modecontrol
         end
     end
 
+
     always @(posedge clk) begin
         reset_r<={reset_r[0],(&key_pulse)&rstn_signal};
     end
@@ -128,6 +129,21 @@ module modecontrol
     assign reset=reset_r[1];
 
 endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 module Edgedetect
 (
@@ -142,6 +158,7 @@ module Edgedetect
 
     always @(posedge clk) begin
         key_prev <= key;
+        // 当检测到按键的负沿时，生成脉冲
         if (key_prev & ~key) 
             pulse_reg <= 0;
         else 
@@ -290,13 +307,13 @@ always @(posedge clk or negedge rstn) begin
                 hold<=1;
             end
             if(!hold) begin
-                if (r_data==0) begin
-                    en<=1;
-                    j<=i+i;
-                end
-                else begin
-                    i<=i+1;
-                end
+            if (r_data==0) begin
+                en<=1;
+                j<=i+i;
+            end
+            else begin
+                i<=i+1;
+            end
             end
         end
         else if(en==1) begin
@@ -416,6 +433,7 @@ module Count_to_one_second #(parameter Count_To = 50_000_000)
     end
 
     assign one_second = one_second_r;
+
 endmodule
 
 

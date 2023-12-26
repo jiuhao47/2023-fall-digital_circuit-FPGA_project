@@ -1,8 +1,9 @@
-module led7seg_decode(input [3:0] digit, input valid, output reg [7:0] seg);
-    //译码器 d to seg
-    //digit数据
-    //valid使能端
-    //seg 输出端
+module led7seg_decode
+(
+    input [3:0] digit,
+    input valid,
+    output reg [7:0] seg
+);
     always @(digit)
     if(valid)
         case(digit)
@@ -19,4 +20,5 @@ module led7seg_decode(input [3:0] digit, input valid, output reg [7:0] seg);
             default: seg = 0;
         endcase
     else seg = 8'd0;
+
 endmodule
