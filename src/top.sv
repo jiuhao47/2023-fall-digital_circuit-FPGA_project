@@ -7,15 +7,9 @@ module top
     output [5:0]    seg_sel,
     output [7:0]    seg_dig
 );
-    reg  [1:0]          reset_r;
-    reg  [3:0]          led_r;
-    reg                 tick_r;
-    reg                 select_reg;
     wire [3:0]          key_signal;
     wire [3:0]          key_pulse;
     wire                rstn_signal;
-    wire                rstn_pulse;
-    wire                initial_state;
     wire                tick;
     wire                one_second;
     wire                select;
@@ -24,8 +18,11 @@ module top
     wire [19:0]         cnt_20b;
     wire [23:0]         cnt_24d;
 
-    Count_to_one_second timer(clk,one_second);//1秒计时器
+    //1秒计时器
+    Count_to_one_second timer(clk,one_second);
 
+    //按键除抖及脉冲
+    Killshake Killshake(clk,rstn,rstn_signal);
     genvar j;
     generate for(j = 0; j < 4; j = j + 1) begin
         Killshake Killshake (clk,key[j],key_signal[j]);
@@ -33,9 +30,34 @@ module top
     end
     endgenerate
 
-    Killshake Killshake(clk,rstn,rstn_signal);
-    Edgedetect Edgedetect(rstn_signal,rstn_pulse);
+    //Led控制及模式选择
+    ledcontrol ledcontrol(clk,rstn_signal,key_pulse,led);
+    modecontrol modecontrol(clk,led,key_pulse,rstn_signal,one_second,reset,select,tick);
 
+    //埃氏筛法
+    isprime solver(clk,reset,tick,select,cnt_20b);
+
+    //显示模块
+    binary_20b_to_bcd_6d transformer(cnt_20b,cnt_24d);
+    genvar i;
+    generate for(i=0; i<6; i=i+1) begin
+            led7seg_decode d(cnt_24d[i*4 +: 4], 1'b1, seg[i*8 +: 8]);
+        end
+    endgenerate
+    seg_driver #(6) driver(clk, rstn_signal, 6'b111111, seg, seg_sel, seg_dig);//数码管驱动，48宽（6*8）数据显示
+
+endmodule
+
+
+module ledcontrol
+(
+    input           clk,
+    input           rstn_signal,
+    input  [3:0]    key_pulse,
+    output [3:0]    led
+);
+
+    reg    [3:0]    led_r;
     always @(posedge clk or negedge rstn_signal) begin
         if(~rstn_signal) begin
             led_r <= 4'b1111;
@@ -52,7 +74,28 @@ module top
         else if(~key_pulse[3]) begin
             led_r <= 4'b0111;
         end
-    end
+    end    
+    assign led = led_r;
+endmodule
+
+
+
+
+module modecontrol
+(
+    input           clk,
+    input           rstn_signal,
+    input           one_second,
+    input [3:0]     led,
+    input [3:0]     key_pulse,
+    output          reset,
+    output          select,
+    output          tick
+);
+
+    reg                 tick_r;
+    reg                 select_reg;
+    reg  [1:0]          reset_r;
 
     always @(posedge clk) begin
         if(~led[0]) begin
@@ -75,31 +118,16 @@ module top
             tick_r<=0;
         end
     end
-    
+
     always @(posedge clk) begin
         reset_r<={reset_r[0],(&key_pulse)&rstn_signal};
     end
 
-
-    assign led = led_r;
     assign tick = tick_r;
     assign select=select_reg;
     assign reset=reset_r[1];
 
-    isprime solver(clk,reset,tick,select,cnt_20b);
-
-    binary_20b_to_bcd_6d transformer(cnt_20b,cnt_24d);
-
-    genvar i;
-    generate for(i=0; i<6; i=i+1) begin
-            led7seg_decode d(cnt_24d[i*4 +: 4], 1'b1, seg[i*8 +: 8]);
-        end
-    endgenerate
-
-    seg_driver #(6) driver(clk, rstn_signal, 6'b111111, seg, seg_sel, seg_dig);//数码管驱动，48宽（6*8）数据显示
-
 endmodule
-
 
 module Edgedetect
 (
@@ -114,7 +142,6 @@ module Edgedetect
 
     always @(posedge clk) begin
         key_prev <= key;
-        // 当检测到按键的负沿时，生成脉冲
         if (key_prev & ~key) 
             pulse_reg <= 0;
         else 
@@ -239,7 +266,6 @@ module isprime #(parameter N=999999)
     reg [2:0]       timer;
     reg             hold;
 
-
 always @(posedge clk or negedge rstn) begin
     if(!rstn) begin
         cnt_temp_reg<=(select)?2:N;
@@ -253,7 +279,6 @@ always @(posedge clk or negedge rstn) begin
         hold<=1;
     end
     else if (i*i<=N) begin
-        //cnt_temp_reg<=(select)?2:N; 
         if(en==0)begin
             r_addr<=i;
             if(timer>2)begin
@@ -265,13 +290,13 @@ always @(posedge clk or negedge rstn) begin
                 hold<=1;
             end
             if(!hold) begin
-            if (r_data==0) begin
-                en<=1;
-                j<=i+i;
-            end
-            else begin
-                i<=i+1;
-            end
+                if (r_data==0) begin
+                    en<=1;
+                    j<=i+i;
+                end
+                else begin
+                    i<=i+1;
+                end
             end
         end
         else if(en==1) begin
@@ -320,7 +345,6 @@ always @(posedge clk or negedge rstn) begin
         end
     end
 end
-//assign cnt_20b={19'b0,done};
 assign cnt_20b=cnt_20b_reg;
 ram_ip ram_ip_inst_1 
 (
@@ -392,7 +416,6 @@ module Count_to_one_second #(parameter Count_To = 50_000_000)
     end
 
     assign one_second = one_second_r;
-
 endmodule
 
 
