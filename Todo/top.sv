@@ -83,8 +83,8 @@ module top
     assign state = led_r;
     assign initial_state = initial_state_r;
     assign tick = tick_r;
-    assign select=select_reg;
-    assign reset=(&key_pulse)&rstn_signal;
+    assign select = select_reg;
+    assign reset = (&led_r) & rstn_signal;
 
 /*
     wire                tick;
