@@ -1,0 +1,76 @@
+\def\allfiles{}
+\input{config/config}
+\begin{document}
+	\setlength{\baselineskip}{22pt}
+	%若需在页眉部分加入内容, 可以在这里输入
+	 \pagestyle{fancy}
+	 \lhead{2023-2024学年秋季学期}
+	 \chead{B2011003Y\quad 数字电路}
+	 \rhead{实验说明文档}
+	\begin{center}
+		\Huge Alinx AX7035t开发板实验\\
+		\Large ——基于埃氏筛法的6位素数计算与显示
+	\end{center}
+	\begin{center}
+		\large \kaishu 姜俊彦\footnote{姜俊彦，中国科学院大学，北京，本次负责}，刘镇豪\footnote{刘镇豪，中国科学院大学，北京，本次负责}，吴尚哲\footnote{吴尚哲，中国科学院大学，北京，本次负责}
+	\end{center}
+	\tableofcontents
+	\setcounter{page}{1}
+	\thispagestyle{fancy}
+	\newpage
+	\section{实验题目}
+	\large\kaishu  素数循环显示: 利用Alinx AX7035t开发板，使用Verilog编程实现计算并显示2-999999之间的素数。6个七段数码管显示素数，4个LED显示当前模式，4个按钮选择循环模式
+	
+	\begin{compactitem}
+		\item 按键1：递增，每秒变一次（上电之后的默认模式）
+		\item 按键2：递减，每秒变一次
+		\item 按键3：递增，最快速度
+		\item 按键4：递减，最快速度
+	\end{compactitem}
+	注意事项：
+	\begin{compactenum}
+		\item 不可以提前将素数计算好存储在FPGA内，必须运行时计算
+		\item 每个小组独立完成，提交一份源码, 一份说明文档，均使用PDF电子版提交
+		\item 组内成员最终共享大作业成绩，不做区别对待
+	\end{compactenum}
+	\section{实验过程}
+	\songti
+	\subsection{实验平台}
+	\begin{compactitem}
+		\item 操作系统：Windows 11 专业版 22H2
+		\item 开发平台：Vivado v2023.1(64-bit)
+		\item 硬件平台：XLINX ARTIX-7 系列 AX7035 FPGA 开发平台
+		\item 协作平台：GitHub
+	\end{compactitem}
+	\subsection{理论调研}
+	\subsection{总体规划}
+	\subsection{开发日志}
+	\newpage
+	\section{实验代码}
+	\newpage
+	\subsection{}
+	
+	\subsection{}
+	\section{实验难点}
+	
+	\section{功能介绍}
+	
+	\section{反思总结}
+	
+	
+	
+	\newpage
+	\section{附录}
+	\subsection{实验源码}
+		\input{code/code}
+		\newpage
+	\subsection{开发日志}
+		%\input{log/log}
+		%\newpage
+	\begin{thebibliography}{3}
+		\bibitem{ref1}
+	\end{thebibliography}
+	
+\end{document}
+
+
