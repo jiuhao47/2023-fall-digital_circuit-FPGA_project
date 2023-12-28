@@ -1,0 +1,169 @@
+%\input{../config/config}
+
+\ifx\allfiles\undefined
+\begin{document}
+\else
+\fi
+
+
+\begin{compactitem}
+	\item 2023-11-23:
+	\begin{compactitem}
+		\item 建立Github协作库、添加模板文件top.sv
+		\item 拿到AX7035 FPGA 开发板
+	\end{compactitem}
+	\item 2023-11-24:
+	\begin{compactitem}
+		\item Github协作邀请完毕
+	\end{compactitem}
+	\item 2023-12-07:
+	\begin{compactitem}
+		\item 总体布局与任务分发
+		\begin{compactitem}
+			\item Edgedetect.v-刘镇豪
+			\item KillShake.v-刘镇豪
+			\item FIFO.v-吴尚哲
+			\item LED\_display.v-吴尚哲
+			\item binary\_20b\_to\_bcd\_6d.v-规划中
+		\end{compactitem}
+		\item SRAM片上内存
+		\begin{compactitem}
+			\item 完成了.xdc管脚协议的补充（后证实不需要）
+			\item 研究了SRAM的结构与原理
+		\end{compactitem}
+		\item 库文件细化
+		\begin{compactitem}
+			\item 建立了参考文献集Reference.txt
+			\item 建立了重要信息共享文档ShareLog.md
+			\item 建立了样本数据集datadic.txt
+		\end{compactitem}
+\end{compactitem}
+	\item 2023-12-09 
+	\begin{compactitem}
+		\item 关于AX7035开发板
+		\begin{compactitem}
+			\item 找到了一份完备的教程
+		\end{compactitem}
+		\item 关于DDR3
+		\begin{compactitem}
+			\item 建立了DDR3的功能及驱动模块
+			\item 建立了mem\_burst.v的读写模块，但是还未来得及分析
+		\end{compactitem}
+		\item 关于.xdc文件
+		\begin{compactitem}
+			\item 恢复了原.xdc样式，并对修改做了备份
+		\end{compactitem}
+		\item 关于top.sv
+		\begin{compactitem}
+			\item 仿照样例撰写了led7seg\_decode.v，本质为0-9二进制数到8端数码管数据译码器
+			\item 写了一些注释：其中下面一段代码存疑
+			\begin{lstlisting}[style=verilog]
+genvar i;
+generate 
+	for(i=0; i<6; i=i+1) begin
+		led7seg_decode d(cnt[i*4 +: 4], 1'b1, seg[i*8 +: 8]);//+是做什么的？
+end
+endgenerate
+			\end{lstlisting}
+		\end{compactitem}
+		\item 关于组员
+		\begin{compactitem}
+			\item FIFO.v已完成
+			\item LED\_display.v已完成
+			\item KillShake.v已完成
+			\item Edgedetect.v已完成
+		\end{compactitem}
+	\end{compactitem}
+	\item 2023-12-17
+	\begin{compactitem}
+		\item 关于top.sv
+		\begin{compactitem}
+			\item 实现了防抖电路和脉冲输出的测试
+			\item 撰写了指示灯显示与状态切换代码
+		\end{compactitem}
+	\end{compactitem}
+	\item 2023-12-18
+	\begin{compactitem}
+		\item 关于top.sv
+		\begin{compactitem}
+			\item 实现了按键与`LED`灯对应的代码与测试-刘镇豪
+			\item 探索了筛法的可能性并决定算法为埃氏筛法，初步完成了埃氏筛法的代码实现，未测试
+		\end{compactitem}
+		\item 总体任务分发
+		\begin{compactitem}
+			\item binary\_20b\_to\_bcd\_6d.v-吴尚哲
+			\item Count\_to\_one\_second.v-刘镇豪
+		\end{compactitem}
+		\item 关于组员完成情况
+		\begin{compactitem}
+			\item Count\_to\_one\_second.v已完成，未测试
+		\end{compactitem}
+	\end{compactitem}
+	\item 2023-12-23
+	\begin{compactitem}
+		\item 关于top.sv
+		\begin{compactitem}
+			\item 实现了八段数码管显示的代码编写及测试（10进制）
+			\item 实现了一秒计时器的整合与编写
+			\item 实现了埃氏筛法（算法层面），但是其对于内存地址的调用目前仍然存在问题
+		\end{compactitem}
+		\item 关于组员
+		\begin{compactitem}
+			\item binary\_20b\_to\_bcd\_6d.v已完成，已测试
+			\item Count\_to\_one\_second.v已测试
+		\end{compactitem}
+	\end{compactitem}
+	\item 2023-12-24
+	\begin{compactitem}
+		\item 关于top.sv
+		\begin{compactitem}
+			\item 实现了埃氏筛法，最快输出达到1s之内完成
+		\end{compactitem}
+	\end{compactitem}
+	\item 2023-12-25
+	\begin{compactitem}
+		\item 关于top.sv
+		\begin{compactitem}
+			\item 实现了最快输出的递增和递减功能按钮对应，但是对于1s输出的复位目前仍存在问题
+		\end{compactitem}
+		\item 关于组员
+		\begin{compactitem}
+			\item 布置了实验报告撰写的相关任务
+		\end{compactitem}
+	\end{compactitem}
+	\item 2023-12-26
+	\begin{compactitem}
+		\item 关于top.sv
+		\begin{compactitem}
+			\item 实现了实验要求的所有功能
+			\item 美化了整体代码布局
+		\end{compactitem}
+		\item 关于库文件
+		\begin{compactitem}
+			\item 将所有模块分装为.v文件存储在src文件夹下
+			\item 将未用到的代码及内容存储在misc/Unused文件夹下
+		\end{compactitem}
+	\end{compactitem}
+	\item 2023-12-28
+	\begin{compactitem}
+		\item 关于实验报告
+		\begin{compactitem}
+			\item 完成了实验报告撰写
+		\end{compactitem}
+		\item 关于算法性能
+		\begin{compactitem}
+			\item 通过统计时钟周期数估计了算法性能
+		\end{compactitem}
+	\end{compactitem}
+\end{compactitem}
+
+
+
+
+
+
+\ifx\allfiles\undefined
+\end{document}
+\else
+\fi
+

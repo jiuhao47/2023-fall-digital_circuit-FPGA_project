@@ -17,7 +17,7 @@ Verilog files for group sharing.
     2. `KillShake.v`-刘镇豪
     3. `FIFO.v`-吴尚哲
     4. `LED_display.v`-吴尚哲
-    5. `32bit_to_6bitLED.v`规划中
+    5. `20bTo6dDecoder.v`规划中
   - `SRAM`片上内存
     1. 完成了`.xdc`管脚协议的补充（后证实不需要）
     2. 研究了`SRAM`的结构与原理
@@ -73,10 +73,10 @@ Verilog files for group sharing.
     1. 实现了按键与`LED`灯对应的代码与测试（by 刘镇豪）
     2. 探索了欧式筛法的可能性并暂时决定搁置，改算法为埃氏筛法，初步完成了埃氏筛法的代码实现，未测试
   - 总体任务分发
-    1. `20bTo6dDecoder.v`-吴尚哲
-    2. `1second.v`-刘镇豪
+    1. `binary_20b_to_bcd_6d.v`-吴尚哲
+    2. `Count_to_one_second.v`-刘镇豪
   - 关于组员完成情况
-    1. `1second.v`已完成，未测试
+    1. `Count_to_one_second.v`已完成，未测试
   
 - 2023.12.23
 
@@ -85,8 +85,8 @@ Verilog files for group sharing.
     2. 实现了一秒计时器的整合与编写
     3. 实现了埃氏筛法（算法层面），但是其对于内存地址的调用目前仍然存在问题。
   - 关于组员
-    1. `20bTo6dDecoder.v`已完成，已测试
-    2. `1second.v`已测试
+    1. `binary_20b_to_bcd_6d.v`已完成，已测试
+    2. `Count_to_one_second.v`已测试
 
 - 2023.12.24
 
@@ -109,3 +109,8 @@ Verilog files for group sharing.
     1. 将所有模块分装为`.v`文件存储在`src`文件夹下
     2. 将未用到的代码及内容存储在`misc/Unused`文件夹下
 
+- 2023.12.26
+  - 关于实验报告
+    1. 完成了实验报告的撰写
+  - 关于算法性能
+    - 通过统计时钟周期数估计了算法性能

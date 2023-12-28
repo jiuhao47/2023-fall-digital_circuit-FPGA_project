@@ -268,8 +268,22 @@ module isprime #(parameter N=999999)
     reg [2:0]       timer;
     reg             hold;
 
+    reg [19:0] a;
+    reg [19:0] b;
+
 always @(posedge clk or negedge rstn) begin
+    /*
+    if(!done) begin
+        b<=b+1;
+        if(b>100) begin
+            a<=a+1;
+            b<=0;
+        end
+    end
+    */
     if(!rstn) begin
+        a<=0;
+        b<=0;
         cnt_temp_reg<=(select)?2:N;
         cnt_20b_reg<=(select)?2:N;
         wea<=0;
@@ -347,7 +361,7 @@ always @(posedge clk or negedge rstn) begin
         end
     end
 end
-assign cnt_20b=cnt_20b_reg;
+assign cnt_20b=a;
 ram_ip ram_ip_inst_1 
 (
     .clka      (clk          ),     // input clka
